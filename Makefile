@@ -1,7 +1,7 @@
 BINARY    := temporal-utility
 IMAGE_TAG ?= temporal-utility:latest
 
-.PHONY: build run test lint tidy clean docker
+.PHONY: build run test lint tidy clean docker swag
 
 build:
 	go build -o $(BINARY) .
@@ -17,6 +17,9 @@ lint:
 
 tidy:
 	go mod tidy
+
+swag:
+	swag init --generalInfo main.go --output docs
 
 docker:
 	docker build -t $(IMAGE_TAG) .

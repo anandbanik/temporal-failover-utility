@@ -1,3 +1,9 @@
+// @title           Temporal Utility API
+// @version         1.0
+// @description     HTTP service for managing Temporal namespaces and cluster topology.
+// @host            localhost:9090
+// @BasePath        /
+
 package main
 
 import (
@@ -10,6 +16,8 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+
+	_ "temporal-utility/docs"
 
 	"temporal-utility/config"
 	"temporal-utility/handlers"

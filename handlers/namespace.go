@@ -86,6 +86,19 @@ type CreateNamespaceResponse struct {
 
 var tracer = otel.Tracer("temporal-utility/handlers")
 
+// CreateNamespace godoc
+//
+//	@Summary      Create a namespace
+//	@Description  Registers a new Temporal namespace.
+//	@Tags         namespaces
+//	@Accept       json
+//	@Produce      json
+//	@Param        request  body      CreateNamespaceRequest   true  "Namespace definition"
+//	@Success      201      {object}  CreateNamespaceResponse
+//	@Failure      400      {object}  map[string]string
+//	@Failure      409      {object}  map[string]string
+//	@Failure      500      {object}  map[string]string
+//	@Router       /api/v1/namespaces [post]
 func (h *NamespaceHandler) CreateNamespace(c *gin.Context) {
 	ctx, span := tracer.Start(c.Request.Context(), "NamespaceHandler.CreateNamespace")
 	defer span.End()
@@ -133,9 +146,20 @@ func (h *NamespaceHandler) CreateNamespace(c *gin.Context) {
 	c.JSON(http.StatusCreated, CreateNamespaceResponse{ID: id})
 }
 
-// PromoteNamespace promotes a local namespace to a global namespace and optionally
-// sets its cluster replication configuration.
-// POST /api/v1/namespaces/:name/promote
+// PromoteNamespace godoc
+//
+//	@Summary      Promote namespace / set clusters
+//	@Description  Promotes a local namespace to global and optionally sets its cluster replication configuration.
+//	@Tags         namespaces
+//	@Accept       json
+//	@Produce      json
+//	@Param        name     path      string                   true   "Namespace name"
+//	@Param        request  body      PromoteNamespaceRequest  false  "Optional cluster list"
+//	@Success      200      {object}  PromoteNamespaceResponse
+//	@Failure      400      {object}  map[string]string
+//	@Failure      404      {object}  map[string]string
+//	@Failure      500      {object}  map[string]string
+//	@Router       /api/v1/namespaces/{name}/promote [post]
 func (h *NamespaceHandler) PromoteNamespace(c *gin.Context) {
 	name := c.Param("name")
 

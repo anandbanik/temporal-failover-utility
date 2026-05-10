@@ -47,8 +47,18 @@ type UpsertRemoteClusterRequest struct {
 	EnableReplication    bool   `json:"enable_replication"`
 }
 
-// UpsertRemoteCluster adds or updates a remote cluster connection.
-// POST /api/v1/clusters
+// UpsertRemoteCluster godoc
+//
+//	@Summary      Upsert remote cluster
+//	@Description  Adds or updates a remote Temporal cluster connection.
+//	@Tags         clusters
+//	@Accept       json
+//	@Produce      json
+//	@Param        request  body  UpsertRemoteClusterRequest  true  "Remote cluster details"
+//	@Success      204      "No Content"
+//	@Failure      400      {object}  map[string]string
+//	@Failure      500      {object}  map[string]string
+//	@Router       /api/v1/clusters [post]
 func (h *ClusterHandler) UpsertRemoteCluster(c *gin.Context) {
 	ctx, span := clusterTracer.Start(c.Request.Context(), "ClusterHandler.UpsertRemoteCluster")
 	defer span.End()

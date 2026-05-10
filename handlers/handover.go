@@ -80,9 +80,20 @@ type handoverWorkflowInput struct {
 	HandoverTimeoutSeconds int    `json:"HandoverTimeoutSeconds"`
 }
 
-// Handover updates the active cluster of a namespace and then starts the
-// namespace-handover workflow in temporal-system.
-// POST /api/v1/namespaces/:name/handover
+// Handover godoc
+//
+//	@Summary      Namespace handover
+//	@Description  Updates the active cluster of a namespace, then starts the namespace-handover workflow in temporal-system.
+//	@Tags         namespaces
+//	@Accept       json
+//	@Produce      json
+//	@Param        name     path      string           true  "Namespace name"
+//	@Param        request  body      HandoverRequest  true  "Target cluster"
+//	@Success      202      {object}  HandoverResponse
+//	@Failure      400      {object}  map[string]string
+//	@Failure      404      {object}  map[string]string
+//	@Failure      500      {object}  map[string]string
+//	@Router       /api/v1/namespaces/{name}/handover [post]
 func (h *HandoverHandler) Handover(c *gin.Context) {
 	namespace := c.Param("name")
 

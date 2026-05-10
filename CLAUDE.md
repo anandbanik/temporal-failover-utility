@@ -23,6 +23,10 @@ go test ./handlers/ -v -run TestName
 
 # Lint (golangci-lint required)
 golangci-lint run
+
+# Regenerate OpenAPI spec — run after changing handler signatures or request/response types
+# Requires: go install github.com/swaggo/swag/cmd/swag@v1.16.6
+make swag
 ```
 
 ## Configuration (environment variables)

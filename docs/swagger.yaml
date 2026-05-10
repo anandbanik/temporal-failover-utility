@@ -1,0 +1,247 @@
+basePath: /
+definitions:
+  handlers.CreateNamespaceRequest:
+    properties:
+      active_cluster:
+        type: string
+      data:
+        additionalProperties:
+          type: string
+        type: object
+      description:
+        type: string
+      is_global:
+        type: boolean
+      name:
+        type: string
+      owner_email:
+        type: string
+      retention_days:
+        type: integer
+    required:
+    - name
+    type: object
+  handlers.CreateNamespaceResponse:
+    properties:
+      id:
+        type: string
+    type: object
+  handlers.HandoverRequest:
+    properties:
+      cluster:
+        type: string
+    required:
+    - cluster
+    type: object
+  handlers.HandoverResponse:
+    properties:
+      run_id:
+        type: string
+      workflow_id:
+        type: string
+    type: object
+  handlers.PromoteNamespaceRequest:
+    properties:
+      clusters:
+        description: Clusters to assign to the namespace replication config. Optional.
+        items:
+          type: string
+        type: array
+    type: object
+  handlers.PromoteNamespaceResponse:
+    properties:
+      clusters:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      is_global:
+        type: boolean
+      name:
+        type: string
+    type: object
+  handlers.UpsertRemoteClusterRequest:
+    properties:
+      enable_connection:
+        type: boolean
+      enable_replication:
+        type: boolean
+      frontend_address:
+        type: string
+      frontend_http_address:
+        type: string
+    required:
+    - frontend_address
+    type: object
+host: localhost:9090
+info:
+  contact: {}
+  description: HTTP service for managing Temporal namespaces and cluster topology.
+  title: Temporal Utility API
+  version: "1.0"
+paths:
+  /api/v1/clusters:
+    post:
+      consumes:
+      - application/json
+      description: Adds or updates a remote Temporal cluster connection.
+      parameters:
+      - description: Remote cluster details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.UpsertRemoteClusterRequest'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Upsert remote cluster
+      tags:
+      - clusters
+  /api/v1/namespaces:
+    post:
+      consumes:
+      - application/json
+      description: Registers a new Temporal namespace.
+      parameters:
+      - description: Namespace definition
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.CreateNamespaceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.CreateNamespaceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "409":
+          description: Conflict
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a namespace
+      tags:
+      - namespaces
+  /api/v1/namespaces/{name}/handover:
+    post:
+      consumes:
+      - application/json
+      description: Updates the active cluster of a namespace, then starts the namespace-handover
+        workflow in temporal-system.
+      parameters:
+      - description: Namespace name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Target cluster
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.HandoverRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/handlers.HandoverResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Namespace handover
+      tags:
+      - namespaces
+  /api/v1/namespaces/{name}/promote:
+    post:
+      consumes:
+      - application/json
+      description: Promotes a local namespace to global and optionally sets its cluster
+        replication configuration.
+      parameters:
+      - description: Namespace name
+        in: path
+        name: name
+        required: true
+        type: string
+      - description: Optional cluster list
+        in: body
+        name: request
+        schema:
+          $ref: '#/definitions/handlers.PromoteNamespaceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.PromoteNamespaceResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Promote namespace / set clusters
+      tags:
+      - namespaces
+swagger: "2.0"

@@ -263,9 +263,32 @@ curl -X POST http://localhost:9090/api/v1/namespaces \
 | `409 Conflict` | Namespace already exists |
 | `500 Internal Server Error` | Temporal communication failure |
 
+## API Documentation (Swagger UI)
+
+The service embeds a Swagger UI at `/swagger/index.html` and serves the OpenAPI spec at `/swagger/doc.json`.
+
+Once the server is running:
+
+```
+http://localhost:9090/swagger/index.html
+```
+
+The spec is generated from source annotations using [swaggo/swag](https://github.com/swaggo/swag). Re-generate it whenever handler signatures or request/response types change:
+
+```bash
+# Install the CLI (one-time)
+go install github.com/swaggo/swag/cmd/swag@v1.16.6
+
+# Re-generate docs/
+make swag
+```
+
+The generated `docs/` directory is committed so the service can be built and run without requiring the `swag` CLI.
+
 ## Development
 
 ```bash
+make swag    # regenerate OpenAPI spec (requires swag CLI)
 make test    # run all tests with race detector
 make lint    # run golangci-lint
 make tidy    # tidy go.mod / go.sum
