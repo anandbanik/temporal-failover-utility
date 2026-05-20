@@ -1,0 +1,30 @@
+services:
+  utility-api-east:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: utility-api-east
+    environment:
+      - SERVER_PORT=9090
+      - TEMPORAL_HOST_PORT=temporal-east:7233
+    ports:
+      - 9090:9090
+    networks:
+      - temporal-network
+
+  utility-api-west:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: utility-api-west
+    environment:
+      - SERVER_PORT=9090
+      - TEMPORAL_HOST_PORT=temporal-west:7233
+    ports:
+      - 9091:9090
+    networks:
+      - temporal-network
+
+networks:
+  temporal-network:
+    external: true

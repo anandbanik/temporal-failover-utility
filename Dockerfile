@@ -12,6 +12,6 @@ FROM gcr.io/distroless/static-debian12
 
 COPY --from=builder /app/temporal-utility /temporal-utility
 
-EXPOSE 8080
+EXPOSE 9090
 
 ENTRYPOINT ["/temporal-utility"]
