@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -8,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
@@ -81,6 +83,57 @@ func TestLogger_ErrorLevel_5xx(t *testing.T) {
 
 	require.Equal(t, 1, logs.Len())
 	assert.Equal(t, zapcore.ErrorLevel, logs.All()[0].Level)
+}
+
+func TestLogger_LogsTraceAndSpanID(t *testing.T) {
+	traceID, _ := trace.TraceIDFromHex("4bf92f3577b34da6a3ce929d0e0e4736")
+	spanID, _ := trace.SpanIDFromHex("00f067aa0ba902b7")
+	spanCtx := trace.NewSpanContext(trace.SpanContextConfig{
+		TraceID:    traceID,
+		SpanID:     spanID,
+		TraceFlags: trace.FlagsSampled,
+	})
+
+	logger, logs := newObservedLogger()
+	r := gin.New()
+	r.Use(func(c *gin.Context) {
+		ctx := trace.ContextWithSpanContext(c.Request.Context(), spanCtx)
+		c.Request = c.Request.WithContext(ctx)
+		c.Next()
+	})
+	r.Use(Logger(logger))
+	r.GET("/test", func(c *gin.Context) { c.Status(http.StatusOK) })
+
+	r.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/test", nil))
+
+	require.Equal(t, 1, logs.Len())
+	fields := make(map[string]string)
+	for _, f := range logs.All()[0].Context {
+		fields[f.Key] = f.String
+	}
+	assert.Equal(t, traceID.String(), fields["trace_id"])
+	assert.Equal(t, spanID.String(), fields["span_id"])
+}
+
+func TestLogger_LogsGinErrors(t *testing.T) {
+	logger, logs := newObservedLogger()
+	r := gin.New()
+	r.Use(Logger(logger))
+	r.GET("/test", func(c *gin.Context) {
+		_ = c.Error(fmt.Errorf("something went wrong"))
+		c.Status(http.StatusInternalServerError)
+	})
+
+	r.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(http.MethodGet, "/test", nil))
+
+	require.Equal(t, 1, logs.Len())
+	var hasErrors bool
+	for _, f := range logs.All()[0].Context {
+		if f.Key == "errors" {
+			hasErrors = true
+		}
+	}
+	assert.True(t, hasErrors, "expected errors field in log")
 }
 
 func TestLogger_StatusAndLatencyPresent(t *testing.T) {
