@@ -233,6 +233,22 @@ func TestHandover_NoWorkflowStartedOnUpdateFailure(t *testing.T) {
 	assert.False(t, workflowStarted, "workflow must not start when active cluster update fails")
 }
 
+func TestEncodeHandoverInput_RoundTrip(t *testing.T) {
+	input := handoverWorkflowInput{
+		Namespace:              "my-ns",
+		RemoteCluster:          "cluster-b",
+		AllowedLaggingSeconds:  120,
+		HandoverTimeoutSeconds: 5,
+	}
+	payloads, err := encodeHandoverInput(input)
+	require.NoError(t, err)
+	require.Len(t, payloads.Payloads, 1)
+
+	var decoded handoverWorkflowInput
+	require.NoError(t, json.Unmarshal(payloads.Payloads[0].Data, &decoded))
+	assert.Equal(t, input, decoded)
+}
+
 func TestHandover_ActiveClusterNotUpdatedOnReplicationConfigCheck(t *testing.T) {
 	var capturedUpdate *workflowservice.UpdateNamespaceRequest
 	mock := &mockHandoverServiceClient{

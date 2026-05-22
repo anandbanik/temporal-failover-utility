@@ -57,7 +57,11 @@ func TestUpsertRemoteCluster_Success(t *testing.T) {
 		"enable_connection": true,
 	})
 
-	assert.Equal(t, http.StatusNoContent, w.Code)
+	require.Equal(t, http.StatusOK, w.Code)
+	var resp UpsertRemoteClusterResponse
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp))
+	assert.Equal(t, "temporal-east:7233", resp.FrontendAddress)
+	assert.True(t, resp.EnableConnection)
 }
 
 func TestUpsertRemoteCluster_MissingFrontendAddress(t *testing.T) {

@@ -36,6 +36,21 @@ func TestLoad_Defaults(t *testing.T) {
 	assert.Equal(t, "0.1.0", cfg.OTEL.ServiceVersion)
 }
 
+func TestGetEnvInt_ReturnsEnvValue(t *testing.T) {
+	t.Setenv("TEST_INT_VAR", "42")
+	assert.Equal(t, 42, getEnvInt("TEST_INT_VAR", 0))
+}
+
+func TestGetEnvInt_FallbackOnMissing(t *testing.T) {
+	unsetEnvVars(t, "TEST_INT_VAR_MISSING")
+	assert.Equal(t, 99, getEnvInt("TEST_INT_VAR_MISSING", 99))
+}
+
+func TestGetEnvInt_FallbackOnInvalid(t *testing.T) {
+	t.Setenv("TEST_INT_VAR_BAD", "not-a-number")
+	assert.Equal(t, 7, getEnvInt("TEST_INT_VAR_BAD", 7))
+}
+
 func TestLoad_EnvOverrides(t *testing.T) {
 	t.Setenv("SERVER_PORT", "9090")
 	t.Setenv("TEMPORAL_HOST_PORT", "temporal.prod:7233")
