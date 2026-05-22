@@ -41,10 +41,17 @@ func newClusterHandler(svc clusterServiceClient, logger *zap.Logger) *ClusterHan
 }
 
 type UpsertRemoteClusterRequest struct {
-	FrontendAddress      string `json:"frontend_address" binding:"required"`
-	EnableConnection     bool   `json:"enable_connection"`
-	FrontendHttpAddress  string `json:"frontend_http_address"`
-	EnableReplication    bool   `json:"enable_replication"`
+	FrontendAddress     string `json:"frontend_address" binding:"required"`
+	EnableConnection    bool   `json:"enable_connection"`
+	FrontendHttpAddress string `json:"frontend_http_address"`
+	EnableReplication   bool   `json:"enable_replication"`
+}
+
+type UpsertRemoteClusterResponse struct {
+	FrontendAddress     string `json:"frontend_address"`
+	EnableConnection    bool   `json:"enable_connection"`
+	FrontendHttpAddress string `json:"frontend_http_address,omitempty"`
+	EnableReplication   bool   `json:"enable_replication"`
 }
 
 // UpsertRemoteCluster godoc
@@ -54,8 +61,8 @@ type UpsertRemoteClusterRequest struct {
 //	@Tags         clusters
 //	@Accept       json
 //	@Produce      json
-//	@Param        request  body  UpsertRemoteClusterRequest  true  "Remote cluster details"
-//	@Success      204      "No Content"
+//	@Param        request  body      UpsertRemoteClusterRequest   true  "Remote cluster details"
+//	@Success      200      {object}  UpsertRemoteClusterResponse
 //	@Failure      400      {object}  map[string]string
 //	@Failure      500      {object}  map[string]string
 //	@Router       /api/v1/clusters [post]
@@ -93,5 +100,10 @@ func (h *ClusterHandler) UpsertRemoteCluster(c *gin.Context) {
 	}
 
 	h.logger.Info("remote cluster upserted", zap.String("frontend_address", req.FrontendAddress))
-	c.Status(http.StatusNoContent)
+	c.JSON(http.StatusOK, UpsertRemoteClusterResponse{
+		FrontendAddress:     req.FrontendAddress,
+		EnableConnection:    req.EnableConnection,
+		FrontendHttpAddress: req.FrontendHttpAddress,
+		EnableReplication:   req.EnableReplication,
+	})
 }
