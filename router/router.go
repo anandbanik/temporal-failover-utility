@@ -10,7 +10,7 @@ import (
 	"temporal-utility/middleware"
 )
 
-func New(namespaceHandler *handlers.NamespaceHandler, clusterHandler *handlers.ClusterHandler, handoverHandler *handlers.HandoverHandler, logger *zap.Logger) *gin.Engine {
+func New(namespaceHandler *handlers.NamespaceHandler, clusterHandler *handlers.ClusterHandler, handoverHandler *handlers.HandoverHandler, healthHandler *handlers.HealthHandler, logger *zap.Logger) *gin.Engine {
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(middleware.OTEL())
@@ -27,6 +27,7 @@ func New(namespaceHandler *handlers.NamespaceHandler, clusterHandler *handlers.C
 		v1.POST("/namespaces/:name/promote", namespaceHandler.PromoteNamespace)
 		v1.POST("/namespaces/:name/handover", handoverHandler.Handover)
 		v1.POST("/clusters", clusterHandler.UpsertRemoteCluster)
+		v1.GET("/health/temporal", healthHandler.CheckTemporalHealth)
 	}
 
 	return r

@@ -17,7 +17,7 @@ func init() {
 }
 
 func TestHealthz(t *testing.T) {
-	r := New(nil, nil, nil, zap.NewNop())
+	r := New(nil, nil, nil, nil, zap.NewNop())
 
 	req := httptest.NewRequest(http.MethodGet, "/healthz", nil)
 	w := httptest.NewRecorder()
@@ -30,7 +30,7 @@ func TestHealthz(t *testing.T) {
 }
 
 func TestNamespaceRouteRegistered(t *testing.T) {
-	r := New(nil, nil, nil, zap.NewNop())
+	r := New(nil, nil, nil, nil, zap.NewNop())
 
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/namespaces", nil)
 	w := httptest.NewRecorder()

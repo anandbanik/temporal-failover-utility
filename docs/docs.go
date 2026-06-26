@@ -40,8 +40,11 @@ const docTemplate = `{
                     }
                 ],
                 "responses": {
-                    "204": {
-                        "description": "No Content"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.UpsertRemoteClusterResponse"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
@@ -59,6 +62,32 @@ const docTemplate = `{
                             "additionalProperties": {
                                 "type": "string"
                             }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/health/temporal": {
+            "get": {
+                "description": "Verifies connectivity to the Temporal server by calling GetClusterInfo.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Check Temporal server health",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.TemporalHealthResponse"
+                        }
+                    },
+                    "503": {
+                        "description": "Service Unavailable",
+                        "schema": {
+                            "$ref": "#/definitions/handlers.TemporalHealthResponse"
                         }
                     }
                 }
@@ -356,11 +385,42 @@ const docTemplate = `{
                 }
             }
         },
+        "handlers.TemporalHealthResponse": {
+            "type": "object",
+            "properties": {
+                "cluster_name": {
+                    "type": "string"
+                },
+                "server_version": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
         "handlers.UpsertRemoteClusterRequest": {
             "type": "object",
             "required": [
                 "frontend_address"
             ],
+            "properties": {
+                "enable_connection": {
+                    "type": "boolean"
+                },
+                "enable_replication": {
+                    "type": "boolean"
+                },
+                "frontend_address": {
+                    "type": "string"
+                },
+                "frontend_http_address": {
+                    "type": "string"
+                }
+            }
+        },
+        "handlers.UpsertRemoteClusterResponse": {
+            "type": "object",
             "properties": {
                 "enable_connection": {
                     "type": "boolean"

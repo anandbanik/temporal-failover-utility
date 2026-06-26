@@ -52,7 +52,8 @@ func main() {
 	namespaceHandler := handlers.NewNamespaceHandler(temporalClient, logger)
 	clusterHandler := handlers.NewClusterHandler(temporalClient, logger)
 	handoverHandler := handlers.NewHandoverHandler(temporalClient, logger)
-	r := router.New(namespaceHandler, clusterHandler, handoverHandler, logger)
+	healthHandler := handlers.NewHealthHandler(temporalClient, logger)
+	r := router.New(namespaceHandler, clusterHandler, handoverHandler, healthHandler, logger)
 
 	if os.Getenv("AWS_LAMBDA_RUNTIME_API") != "" {
 		// Lambda mode: Temporal client and OTel SDK are reused across warm invocations.

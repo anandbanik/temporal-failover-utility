@@ -61,6 +61,15 @@ definitions:
       name:
         type: string
     type: object
+  handlers.TemporalHealthResponse:
+    properties:
+      cluster_name:
+        type: string
+      server_version:
+        type: string
+      status:
+        type: string
+    type: object
   handlers.UpsertRemoteClusterRequest:
     properties:
       enable_connection:
@@ -73,6 +82,17 @@ definitions:
         type: string
     required:
     - frontend_address
+    type: object
+  handlers.UpsertRemoteClusterResponse:
+    properties:
+      enable_connection:
+        type: boolean
+      enable_replication:
+        type: boolean
+      frontend_address:
+        type: string
+      frontend_http_address:
+        type: string
     type: object
 host: localhost:9090
 info:
@@ -96,8 +116,10 @@ paths:
       produces:
       - application/json
       responses:
-        "204":
-          description: No Content
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.UpsertRemoteClusterResponse'
         "400":
           description: Bad Request
           schema:
@@ -113,6 +135,23 @@ paths:
       summary: Upsert remote cluster
       tags:
       - clusters
+  /api/v1/health/temporal:
+    get:
+      description: Verifies connectivity to the Temporal server by calling GetClusterInfo.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.TemporalHealthResponse'
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/handlers.TemporalHealthResponse'
+      summary: Check Temporal server health
+      tags:
+      - health
   /api/v1/namespaces:
     post:
       consumes:
